@@ -11,6 +11,11 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", login);
 
+// here’s your new verify route:
+router.get("/verify", authenticateUser, (req, res) => {
+  res.sendStatus(200);
+});
+
 // Admin only
 router.patch(
   "/update-role",
