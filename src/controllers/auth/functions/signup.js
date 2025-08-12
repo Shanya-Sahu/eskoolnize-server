@@ -4,20 +4,37 @@ import { generateToken } from "../../../utils/jwt/generate-token.js";
 
 export const signup = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, rollNumber, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
+    // Validate required fields based on role
+    if (!name || !password || !role) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    if (!["Teacher", "Student", "Parent"].includes(role)) {
+    if (!["teacher", "student", "parent"].includes(role)) {
       return res.status(400).json({ message: "Invalid role." });
     }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (role === "student" && !rollNumber) {
+      return res
+        .status(400)
+        .json({ message: "Roll number is required for students." });
+    }
+
+    if (role !== "student" && !email) {
+      return res
+        .status(400)
+        .json({ message: "Email is required for non-students." });
+    }
+
+    // Check if user already exists
+    const existingUser =
+      role === "student"
+        ? await prisma.user.findUnique({ where: { rollNumber } })
+        : await prisma.user.findUnique({ where: { email } });
 
     if (existingUser) {
-      return res.status(409).json({ message: "Email already exists." });
+      return res.status(409).json({ message: "User already exists." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -25,7 +42,8 @@ export const signup = async (req, res) => {
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: role === "student" ? null : email,
+        rollNumber: role === "student" ? rollNumber : null,
         password: hashedPassword,
         role,
       },
@@ -39,6 +57,7 @@ export const signup = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        rollNumber: user.rollNumber,
         role: user.role,
         verified: user.verified || false,
       },

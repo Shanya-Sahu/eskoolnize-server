@@ -7,13 +7,13 @@ import { verifyUser } from "../../controllers/admin/verify-user.js";
 const router = express.Router();
 
 // Get all users (Admin only)
-router.get("/users", authenticateUser, authorizeUser(["ADMIN"]), getAllUsers);
+router.get("/users", authenticateUser, authorizeUser(["admin"]), getAllUsers);
 
 // Verify a user (Admin only)
 router.patch(
   "/verify-user",
   authenticateUser,
-  authorizeUser(["ADMIN"]),
+  authorizeUser(["admin"]),
   verifyUser
 );
 
