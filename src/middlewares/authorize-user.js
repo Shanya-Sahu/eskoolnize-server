@@ -11,8 +11,8 @@ export const authorizeUser = (allowedRoles = []) => {
         .json({ message: "Access denied. Unauthorized role." });
     }
 
-    // Block unverified users (except ADMIN)
-    if (!req.user.verified && req.user.role !== "ADMIN") {
+    // Block unverified users (except admin)
+    if (!req.user.verified && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ message: "Account not verified by admin yet." });

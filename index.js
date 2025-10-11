@@ -23,6 +23,8 @@ app.listen(PORT, () => {
 
 // error handler
 app.use((err, req, res, next) => {
+  res.set("Cache-Control", "no-store"); // disable caching
+  next();
   console.error("🔥 Error:", err.message);
   const status = err.statusCode || 500;
   res.status(status).json({ message: err.message });

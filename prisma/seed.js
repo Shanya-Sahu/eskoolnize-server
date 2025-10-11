@@ -7,13 +7,15 @@ const prisma = new PrismaClient();
 
 async function main() {
   const adminEmail = "admin@school.com";
+  const newPassword = "admin@123"; // change this to your desired password
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   const existing = await prisma.user.findFirst({
     where: { email: adminEmail, role: "admin" },
   });
 
   if (!existing) {
-    const hashedPassword = await bcrypt.hash("admin@123", 10);
     await prisma.user.create({
       data: {
         name: "Super Admin",
@@ -25,7 +27,11 @@ async function main() {
     });
     console.log("✅ Admin user seeded successfully.");
   } else {
-    console.log("⚠️ Admin already exists.");
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: { password: hashedPassword },
+    });
+    console.log("🔑 Admin password updated successfully.");
   }
 }
 
